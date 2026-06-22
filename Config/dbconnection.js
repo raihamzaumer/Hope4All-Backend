@@ -18,7 +18,8 @@ const dbConnection = async () => {
   );
 
   console.log("Attempting connection to (masked):", maskedURI);
-
+  console.log("TYPE:", typeof process.env.MONGO_URI);
+  console.log("VALUE:", process.env.MONGO_URI);
   let attempts = 0;
 
   const connect = async () => {
