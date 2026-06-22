@@ -101,14 +101,6 @@ app.get("/", (req, res) => {
   res.send("Hello from Node.js + MongoDB!");
 });
 
-// Health Check Route (ALB/ECS ke liye)
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    status: "healthy",
-    timestamp: new Date().toISOString()
-  });
-});
 // Setup scheduled job for fee reminders
 // Runs every minute for demonstration purposes
 cron.schedule('* * * * *', async () => {
