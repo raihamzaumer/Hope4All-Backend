@@ -42,12 +42,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       # -------------------------
-      # 4. Build & Push Docker Image
+      # 4. Build & Push (LATEST TAG)
       # -------------------------
-      - name: Build and push image
+      - name: Build and push image (latest)
         id: build-image
         run: |
-          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
@@ -55,29 +55,26 @@ jobs:
           echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
 
       # -------------------------
-      # 5. Render new task definition (IMPORTANT FIX)
+      # 5. Force ECS service update (IMPORTANT)
       # -------------------------
-      - name: Render new task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ secrets.TASK_DEFINITION }}
-          container-name: backend
-          image: ${{ steps.build-image.outputs.image }}
+      - name: Force ECS deployment (pull latest image)
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
 
       # -------------------------
-      # 6. Deploy updated task definition
+      # 6. Wait for stability
       # -------------------------
-      - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      - name: Wait for service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE
 
       # -------------------------
       # 7. Done
       # -------------------------
       - name: Deployment Success
-        run: echo "Backend deployed successfully 🚀 (ECS task updated with new image)"
+        run: echo "Backend deployed successfully 🚀 (latest image used)"
