@@ -25,14 +25,15 @@ import Notification from "./model/notification_model.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
-dns.setServers(['8.8.8.8', '8.8.4.4']);
-dbconnection();
 
 const app = express();
 const server = createServer(app);
+
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
 const io = new Server(server, {
   cors: {
-    origin: "https://www.hamzaweb.shop",
+    origin: FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
   }
@@ -40,9 +41,13 @@ const io = new Server(server, {
 
 initSocket(io);
 
-app.options(cors({
-  origin: "*"
+app.use(cors({
+  origin: FRONTEND_URL,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
 }));
+
+app.options("*", cors());
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -61,13 +66,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// added by me to resolve cors issue
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://www.hamzaweb.shop");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
 
 // auth routes
 app.use("/api/auth", authRoutes);
