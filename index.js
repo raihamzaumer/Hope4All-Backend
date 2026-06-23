@@ -32,14 +32,15 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    origin: "https://www.hamzaweb.shop",
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true
   }
 });
 
 initSocket(io);
 
-app.use(cors({
+app.options(cors({
   origin: "*"
 }));
 
@@ -57,6 +58,14 @@ app.use((req, res, next) => {
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(` ${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
+
+// added by me to resolve cors issue
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://www.hamzaweb.shop");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 
