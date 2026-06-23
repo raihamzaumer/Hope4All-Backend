@@ -1,4 +1,3 @@
-
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -25,29 +24,23 @@ import Notification from "./model/notification_model.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+dbconnection();
 
 const app = express();
 const server = createServer(app);
-
-const FRONTEND_URL = process.env.FRONTEND_URL;
-
 const io = new Server(server, {
   cors: {
-    origin: FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   }
 });
 
 initSocket(io);
 
 app.use(cors({
-  origin: FRONTEND_URL,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  origin: "*"
 }));
-
-// app.options("*", cors());
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -65,7 +58,6 @@ app.use((req, res, next) => {
   console.log(` ${req.method} ${req.path} - ${new Date().toISOString()}`);
   next();
 });
-
 
 // auth routes
 app.use("/api/auth", authRoutes);
