@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Helm chart
         uses: actions/checkout@v4
         with:
-          repository: hamza-umer/hope4all-helm
+          repository: raihamzaumer/app
           token: ${{ secrets.HELM_REPO_TOKEN }}
           path: helm-charts
 
